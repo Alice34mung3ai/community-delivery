@@ -18,10 +18,15 @@ import RideCargoSection from './components/RideCargoSection';
 import ProviderDashboard from './components/ProviderDashboard';
 import DriverDashboard from './components/DriverDashboard';
 import MerchantDashboard from './components/MerchantDashboard';
+import LoginModal from './components/LoginModal';
 
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('tenant');
   const [tenantAddress, setTenantAddress] = useState('72 Wall St, Apt 14C');
+
+  // Auth state
+  const [user, setUser] = useState<{ id: string; email: string; role: string; name?: string } | null>(null);
+  const [isLoginOpen, setIsLoginOpen] = useState(false);
 
   // Backend loaded data
   const [pros, setPros] = useState<VerifiedPro[]>([]);
@@ -54,14 +59,32 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
+  // Auth handlers
+  const handleLogin = (serverUser: { id: string; email: string; role: string; name?: string }) => {
+    setUser(serverUser);
+    setIsLoginOpen(false);
+    showToast(`${serverUser.name || serverUser.email} signed in as ${serverUser.role.toUpperCase()}`);
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
+    } catch (err) {
+      console.warn('Logout request failed', err);
+    } finally {
+      setUser(null);
+      showToast('Signed out');
+    }
+  };
+
   // Initial Fetch from Node.js Express API
   const fetchData = async () => {
     try {
       const [prosRes, storesRes, driversRes, ordersRes] = await Promise.all([
-        fetch('/api/services'),
-        fetch('/api/stores'),
-        fetch('/api/drivers'),
-        fetch('/api/orders')
+        fetch('/api/services', { credentials: 'include' }),
+        fetch('/api/stores', { credentials: 'include' }),
+        fetch('/api/drivers', { credentials: 'include' }),
+        fetch('/api/orders', { credentials: 'include' })
       ]);
 
       const [prosData, storesData, driversData, ordersData] = await Promise.all([
@@ -156,6 +179,7 @@ export default function App() {
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -210,6 +234,7 @@ export default function App() {
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -259,6 +284,7 @@ export default function App() {
       const res = await fetch('/api/orders', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -279,6 +305,7 @@ export default function App() {
       const res = await fetch(`/api/orders/${orderId}/status`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ status, proId, driverId })
       });
       const data = await res.json();
@@ -304,6 +331,7 @@ export default function App() {
       const res = await fetch(`/api/orders/${orderId}/messages`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ sender, senderName, text })
       });
       const data = await res.json();
@@ -346,7 +374,7 @@ export default function App() {
       
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-20 right-4 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center space-x-2 text-xs font-semibold animate-in fade-in slide-in-from-top-4 duration-200">
+        <div className="fixed top-20 right-4 z-50 bg-slate-900 text-white px-4 py-3 rounded-xl shadow-xl border border-slate-700 flex items-center space-x-2 text-xs font-semibold animate-in fade-in">
           <span className="w-2 h-2 rounded-full bg-blue-400"></span>
           <span>{toastMessage}</span>
         </div>
@@ -470,6 +498,9 @@ export default function App() {
           onSelectOrder={(order) => setActiveTrackingOrder(order)}
           tenantAddress={tenantAddress}
           onChangeAddress={() => setIsAddressModalOpen(true)}
+          onOpenLogin={() => setIsLoginOpen(true)}
+          user={user}
+          onLogout={handleLogout}
         />
 
         {/* Dynamic Role Page Container */}
@@ -777,7 +808,7 @@ export default function App() {
                         <button
                           id="open-active-order-btn"
                           onClick={() => setActiveTrackingOrder(latestActiveOrder)}
-                          className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center space-x-1.5"
+                          className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-bold transition-colors cursor-pointer flex items-center justify-center space-x-2"
                         >
                           <span>Open Live GPS &amp; Chat</span>
                           <ArrowRight className="w-3.5 h-3.5" />
@@ -863,7 +894,7 @@ export default function App() {
                     <button
                       id="open-ai-diagnosis-banner-btn"
                       onClick={() => setIsAiModalOpen(true)}
-                      className="mt-4 w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center justify-center space-x-1.5"
+                      className="mt-4 w-full py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs rounded-xl transition-colors cursor-pointer flex items-center justify-center space-x-2"
                     >
                       <span>Diagnose Issue &amp; Price</span>
                       <ArrowRight className="w-3.5 h-3.5" />
@@ -1008,6 +1039,11 @@ export default function App() {
             </button>
           </div>
         </div>
+      )}
+
+      {/* Login Modal */}
+      {isLoginOpen && (
+        <LoginModal onClose={() => setIsLoginOpen(false)} onLogin={handleLogin} />
       )}
 
     </div>
