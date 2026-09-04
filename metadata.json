@@ -1,0 +1,6 @@
+{
+  "name": "LocalPro & Market: On-Demand Services",
+  "description": "On-demand local ecosystem connecting tenants with verified pros (plumbing, electrical, cleaning), local supermarkets, pharmacies, and real-time driver dispatch.",
+  "requestFramePermissions": ["geolocation"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
