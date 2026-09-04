@@ -4,7 +4,7 @@ import { UserRole } from '../types';
 
 interface LoginModalProps {
   onClose: () => void;
-  onLogin: (role: UserRole, name?: string) => void;
+  onLogin: (user: { id: string; email: string; role: string; name?: string }) => void;
 }
 
 export default function LoginModal({ onClose, onLogin }: LoginModalProps) {
@@ -12,10 +12,26 @@ export default function LoginModal({ onClose, onLogin }: LoginModalProps) {
   const [password, setPassword] = useState('');
   const [role, setRole] = useState<UserRole>('tenant');
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Prototype-only: do client-side role assignment based on selected role
-    onLogin(role, email.split('@')[0] || 'User');
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+      if (!data.success) {
+        alert(data.error || 'Sign in failed');
+        return;
+      }
+      onLogin(data.data.user);
+      onClose();
+    } catch (err) {
+      console.error('Login request failed', err);
+      alert('Login request failed');
+    }
   };
 
   return (
@@ -88,13 +104,39 @@ export default function LoginModal({ onClose, onLogin }: LoginModalProps) {
               <LogIn className="w-4 h-4" />
               Sign in
             </button>
-            <button type="button" onClick={() => { setEmail('demo@tenant.test'); setPassword('password'); setRole('tenant'); onLogin('tenant', 'demo'); }} className="text-xs text-slate-500 underline">
+            <button
+              type="button"
+              onClick={async () => {
+                setEmail('demo@tenant.test');
+                setPassword('password');
+                setRole('tenant');
+                try {
+                  const res = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    credentials: 'include',
+                    body: JSON.stringify({ email: 'demo@tenant.test', password: 'password' })
+                  });
+                  const data = await res.json();
+                  if (data.success) {
+                    onLogin(data.data.user);
+                    onClose();
+                  } else {
+                    alert(data.error || 'Demo login failed');
+                  }
+                } catch (err) {
+                  console.error(err);
+                  alert('Demo login failed');
+                }
+              }}
+              className="text-xs text-slate-500 underline"
+            >
               Quick demo
             </button>
           </div>
         </form>
 
-        <p className="text-[11px] text-slate-400 mt-4">This login UI is a prototype. It does not authenticate with a server yet.</p>
+        <p className="text-[11px] text-slate-400 mt-4">This login UI now communicates with the server using HTTP-only cookies.</p>
       </div>
     </div>
   );
