@@ -1,4 +1,4 @@
-import { Shield, ShoppingCart, User, Wrench, Truck, Store, MapPin, Bell, Search } from 'lucide-react';
+import { Shield, ShoppingCart, User, Wrench, Truck, Store, MapPin, Bell, Search, LogIn } from 'lucide-react';
 import { UserRole, Order } from '../types';
 
 interface NavbarProps {
@@ -10,6 +10,10 @@ interface NavbarProps {
   onSelectOrder: (order: Order) => void;
   tenantAddress: string;
   onChangeAddress: () => void;
+  // New props for auth UI
+  onOpenLogin?: () => void;
+  user?: { id: string; email: string; role: string; name?: string } | null;
+  onLogout?: () => void;
 }
 
 export default function Navbar({
@@ -21,6 +25,9 @@ export default function Navbar({
   onSelectOrder,
   tenantAddress,
   onChangeAddress,
+  onOpenLogin,
+  user,
+  onLogout,
 }: NavbarProps) {
   const ongoingOrders = activeOrders.filter(o => o.status !== 'completed' && o.status !== 'cancelled');
 
@@ -112,6 +119,32 @@ export default function Navbar({
             </span>
           )}
         </button>
+
+        {/* Auth UI: Sign in / User badge + Sign out */}
+        {!user ? (
+          <button
+            id="header-login-btn"
+            onClick={onOpenLogin}
+            className="ml-2 flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold"
+          >
+            <LogIn className="w-4 h-4" />
+            <span className="hidden sm:inline">Sign in</span>
+          </button>
+        ) : (
+          <div className="flex items-center gap-3 ml-2">
+            <div className="hidden sm:flex flex-col items-end text-right">
+              <span className="text-[10px] uppercase font-bold text-slate-400 tracking-tighter">Signed in</span>
+              <span className="text-xs font-semibold text-slate-700 truncate max-w-[160px]">{user.name || user.email}</span>
+            </div>
+            <button
+              id="header-logout-btn"
+              onClick={onLogout}
+              className="text-xs text-slate-600 hover:text-slate-900 px-2 py-1 rounded-md border border-transparent hover:bg-slate-100"
+            >
+              Sign out
+            </button>
+          </div>
+        )}
 
         {/* Multi-Role Switcher */}
         <div className="flex items-center p-0.5 bg-slate-100 rounded-lg border border-slate-200 text-xs">
