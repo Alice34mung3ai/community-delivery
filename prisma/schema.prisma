@@ -1,0 +1,152 @@
+// Prisma schema for community-delivery
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  tenant
+  provider
+  driver
+  merchant
+}
+
+enum ServiceCategory {
+  plumbing
+  electrical
+  cleaning
+  carpentry
+  appliances
+}
+
+enum StoreType {
+  supermarket
+  pharmacy
+}
+
+enum OrderType {
+  service
+  store_delivery
+  ride_cargo
+}
+
+enum OrderStatus {
+  pending
+  assigned
+  en_route
+  arrived
+  in_progress
+  completed
+  cancelled
+}
+
+model VerifiedPro {
+  id               String    @id @default(cuid())
+  name             String
+  avatar           String?
+  category         ServiceCategory
+  title            String
+  rating           Float
+  reviewCount      Int
+  hourlyRate       Float
+  isVerified       Boolean
+  licenseNumber    String?
+  yearsExperience  Int
+  distanceMiles    Float
+  responseTimeMin  Int
+  specialties      String[]
+  badges           String[]
+  phone            String
+  completedJobs    Int
+  bio              String?
+  lat              Float
+  lng              Float
+  address          String
+  createdAt        DateTime  @default(now())
+}
+
+model LocalStore {
+  id                 String     @id @default(cuid())
+  name               String
+  type               StoreType
+  logo               String?
+  coverImage         String?
+  rating             Float
+  reviewCount        Int
+  distanceMiles      Float
+  deliveryEstimateMin Int
+  deliveryFee        Float
+  minOrder           Float
+  address            String
+  isOpen             Boolean
+  items              StoreItem[]
+  createdAt          DateTime   @default(now())
+}
+
+model StoreItem {
+  id          String     @id @default(cuid())
+  storeId     String
+  store       LocalStore @relation(fields: [storeId], references: [id])
+  name        String
+  category    String
+  price       Float
+  unit        String
+  image       String?
+  inStock     Boolean
+  description String?
+}
+
+model Driver {
+  id                  String   @id @default(cuid())
+  name                String
+  avatar              String?
+  vehicleType         String
+  vehiclePlate        String
+  rating              Float
+  completedDeliveries Int
+  phone               String
+  currentLat          Float
+  currentLng          Float
+  isOnline            Boolean
+  createdAt           DateTime @default(now())
+}
+
+model Order {
+  id                 String      @id @default(cuid())
+  type               OrderType
+  title              String
+  category           String?
+  status             OrderStatus
+  createdAt          DateTime    @default(now())
+  tenantName         String
+  tenantPhone        String
+  tenantAddress      String
+  apartmentUnit      String?
+  providerId         String?
+  provider           VerifiedPro? @relation(fields: [providerId], references: [id])
+  driverId           String?
+  driver             Driver?      @relation(fields: [driverId], references: [id])
+  storeId            String?
+  store              LocalStore?  @relation(fields: [storeId], references: [id])
+  subtotal           Float
+  deliveryFee        Float
+  serviceFee         Float
+  tax                Float
+  total              Float
+  paymentMethod      String
+  estimatedArrivalMin Int
+  urgency            String
+  scheduledFor       DateTime?
+  notes              String?
+  tenantLat          Float?
+  tenantLng          Float?
+  originLat          Float?
+  originLng          Float?
+  currentLat         Float?
+  currentLng         Float?
+}
