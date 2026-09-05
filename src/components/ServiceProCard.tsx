@@ -110,7 +110,7 @@ export default function ServiceProCard({ pro, onBook, onViewCredentials }: Servi
       {/* Footer Strip with Est. Rate & Action CTA */}
       <div className="flex items-center justify-between gap-3 mt-4 pt-3 border-t border-slate-100">
         <div>
-          <span className="text-xs font-bold text-blue-600 text-base sm:text-lg">${pro.hourlyRate}/hr</span>
+          <span className="text-xs font-bold text-blue-600 text-base sm:text-lg">Ksh{pro.hourlyRate}/hr</span>
           <span className="text-[11px] text-slate-400 font-normal ml-1">Est.</span>
         </div>
 

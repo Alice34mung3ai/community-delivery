@@ -23,13 +23,13 @@ export default function DriverDashboard({
 
   const fallbackDriver: Driver = {
     id: 'driver-1',
-    name: 'Marcus Vance',
+    name: 'Martin Njeru',
     avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&q=80&w=300',
     vehicleType: 'Cargo Van',
-    vehiclePlate: 'NY-VAN-889',
+    vehiclePlate: 'KCW-889Y',
     rating: 4.96,
     completedDeliveries: 1420,
-    phone: '+1 (555) 890-1234',
+    phone: '+254 098 765 432',
     currentLat: 40.7145,
     currentLng: -74.0060,
     isOnline: true
@@ -55,7 +55,7 @@ export default function DriverDashboard({
     o.driverId === currentDriver.id && o.status === 'completed'
   );
 
-  const todayEarnings = 48.50 + completedDeliveries.length * 8.50;
+  const todayEarnings = 480.50 + completedDeliveries.length * 8.50;
 
   return (
     <div id="driver-dashboard-view" className="space-y-5">
@@ -119,7 +119,7 @@ export default function DriverDashboard({
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
         <div className="bg-white p-3.5 rounded-xl border border-slate-200">
           <div className="text-slate-400 text-[11px] font-semibold uppercase tracking-wider">Shift Earnings</div>
-          <div className="text-xl font-bold text-slate-900 mt-1">${todayEarnings.toFixed(2)}</div>
+          <div className="text-xl font-bold text-slate-900 mt-1">Ksh{todayEarnings.toFixed(2)}</div>
           <div className="text-[10px] text-emerald-600 font-semibold mt-0.5">Includes 100% tenant tips</div>
         </div>
 
@@ -188,7 +188,7 @@ export default function DriverDashboard({
                   </div>
 
                   <div className="text-right">
-                    <span className="text-base font-bold text-blue-600">${(trip.deliveryFee + 7.50).toFixed(2)}</span>
+                    <span className="text-base font-bold text-blue-600">Ksh{(trip.deliveryFee + 7.50).toFixed(2)}</span>
                     <div className="text-[10px] text-emerald-700 font-semibold">Driver Fee + Tip</div>
                   </div>
                 </div>

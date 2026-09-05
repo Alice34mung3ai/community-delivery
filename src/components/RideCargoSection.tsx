@@ -64,7 +64,7 @@ export default function RideCargoSection({
 }: RideCargoSectionProps) {
   const [selectedVehicle, setSelectedVehicle] = useState<'Cargo Van' | 'Car' | 'Motorbike / Scooter'>('Cargo Van');
   const [pickup, setPickup] = useState(tenantAddress);
-  const [destination, setDestination] = useState('Metro Storage & Freight Depot, 11th Ave');
+  const [destination, setDestination] = useState('Riverside, Nairobi, Kenya');
   const [cargoNotes, setCargoNotes] = useState('Moving 2 flat-pack furniture boxes & tool crate');
 
   const options = [
@@ -72,7 +72,7 @@ export default function RideCargoSection({
       id: 'Cargo Van',
       name: 'Uber Cargo Van',
       desc: 'Ideal for furniture, appliances, building materials & apartment moves',
-      price: 34.50,
+      price: 3400.50,
       etaMin: 12,
       capacity: 'Up to 1,500 lbs / 250 cu ft',
       icon: Truck,
@@ -82,7 +82,7 @@ export default function RideCargoSection({
       id: 'Motorbike / Scooter',
       name: 'Express Scooter Courier',
       desc: 'Ultra-fast delivery for small parcels, keys, documents & medicines',
-      price: 8.50,
+      price: 80.50,
       etaMin: 6,
       capacity: 'Up to 20 lbs / backpack',
       icon: Bike,
@@ -92,7 +92,7 @@ export default function RideCargoSection({
       id: 'Car',
       name: 'City Sedan / Comfort',
       desc: 'Comfortable point-to-point ride for tenants & light cargo',
-      price: 16.00,
+      price: 160.00,
       etaMin: 8,
       capacity: '4 passengers + trunk space',
       icon: Car,
@@ -161,7 +161,7 @@ export default function RideCargoSection({
                       }`}>
                         <Icon className="w-4 h-4" />
                       </div>
-                      <span className="font-bold text-sm text-blue-600">${opt.price.toFixed(2)}</span>
+                      <span className="font-bold text-sm text-blue-600">Ksh{opt.price.toFixed(2)}</span>
                     </div>
                     <h4 className="font-bold text-xs sm:text-sm text-slate-900 leading-snug">
                       {opt.name}
@@ -263,7 +263,7 @@ export default function RideCargoSection({
           <div className="pt-3 border-t border-slate-200 space-y-2">
             <div className="flex justify-between items-center text-xs">
               <span className="text-slate-500 font-medium">Estimated Rate</span>
-              <span className="font-bold text-blue-600 text-sm">${currentOption.price.toFixed(2)}</span>
+              <span className="font-bold text-blue-600 text-sm">Ksh{currentOption.price.toFixed(2)}</span>
             </div>
 
             <button
