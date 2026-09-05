@@ -26,6 +26,7 @@ app.use(
     credentials: true,
   })
 );
+<<<<<<< HEAD
 
 // --------------------------------------------------
 // KENYA-LOCALIZED FALLBACK DATA
@@ -82,6 +83,8 @@ const initialPros: VerifiedPro[] = [
     }
   }
 ];
+=======
+>>>>>>> origin/main
 
 // --------------------------------------------------
 // AUTHENTICATION
