@@ -19,6 +19,7 @@ import ProviderDashboard from './components/ProviderDashboard';
 import DriverDashboard from './components/DriverDashboard';
 import MerchantDashboard from './components/MerchantDashboard';
 import LoginModal from './components/LoginModal';
+import RegisterModal from './components/RegisterModal';
 
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('tenant');
@@ -27,6 +28,7 @@ export default function App() {
   // Auth state
   const [user, setUser] = useState<{ id: string; email: string; role: string; name?: string } | null>(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
+  const [isRegisterOpen, setIsRegisterOpen] = useState(false);
 
   // Backend loaded data
   const [pros, setPros] = useState<VerifiedPro[]>([]);
@@ -64,6 +66,12 @@ export default function App() {
     setUser(serverUser);
     setIsLoginOpen(false);
     showToast(`${serverUser.name || serverUser.email} signed in as ${serverUser.role.toUpperCase()}`);
+  };
+
+  const handleRegister = (serverUser: { id: string; email: string; role: string; name?: string }) => {
+    setUser(serverUser);
+    setIsRegisterOpen(false);
+    showToast(`Welcome, ${serverUser.name || serverUser.email}! Account created as ${serverUser.role.toUpperCase()}`);
   };
 
   const handleLogout = async () => {
@@ -499,6 +507,7 @@ export default function App() {
           tenantAddress={tenantAddress}
           onChangeAddress={() => setIsAddressModalOpen(true)}
           onOpenLogin={() => setIsLoginOpen(true)}
+          onOpenRegister={() => setIsRegisterOpen(true)}
           user={user}
           onLogout={handleLogout}
         />
@@ -1048,6 +1057,11 @@ export default function App() {
       {/* Login Modal */}
       {isLoginOpen && (
         <LoginModal onClose={() => setIsLoginOpen(false)} onLogin={handleLogin} />
+      )}
+
+      {/* Register Modal */}
+      {isRegisterOpen && (
+        <RegisterModal onClose={() => setIsRegisterOpen(false)} onRegister={handleRegister} />
       )}
 
     </div>

@@ -12,6 +12,7 @@ interface NavbarProps {
   onChangeAddress: () => void;
   // New props for auth UI
   onOpenLogin?: () => void;
+  onOpenRegister?: () => void;
   user?: { id: string; email: string; role: string; name?: string } | null;
   onLogout?: () => void;
 }
@@ -26,6 +27,7 @@ export default function Navbar({
   tenantAddress,
   onChangeAddress,
   onOpenLogin,
+  onOpenRegister,
   user,
   onLogout,
 }: NavbarProps) {
@@ -120,16 +122,25 @@ export default function Navbar({
           )}
         </button>
 
-        {/* Auth UI: Sign in / User badge + Sign out */}
+        {/* Auth UI: Sign in / Register / User badge + Sign out */}
         {!user ? (
-          <button
-            id="header-login-btn"
-            onClick={onOpenLogin}
-            className="ml-2 flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold"
-          >
-            <LogIn className="w-4 h-4" />
-            <span className="hidden sm:inline">Sign in</span>
-          </button>
+          <div className="flex items-center gap-2 ml-2">
+            <button
+              id="header-login-btn"
+              onClick={onOpenLogin}
+              className="flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 text-sm font-semibold"
+            >
+              <LogIn className="w-4 h-4" />
+              <span className="hidden sm:inline">Sign in</span>
+            </button>
+            <button
+              id="header-register-btn"
+              onClick={onOpenRegister}
+              className="px-3 py-1 rounded-full bg-green-600 hover:bg-green-700 text-white text-sm font-semibold"
+            >
+              Register
+            </button>
+          </div>
         ) : (
           <div className="flex items-center gap-3 ml-2">
             <div className="hidden sm:flex flex-col items-end text-right">

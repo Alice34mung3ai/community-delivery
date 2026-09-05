@@ -68,6 +68,7 @@ model VerifiedPro {
   lng              Float
   address          String
   createdAt        DateTime  @default(now())
+  orders           Order[]
 }
 
 model LocalStore {
@@ -86,6 +87,7 @@ model LocalStore {
   isOpen             Boolean
   items              StoreItem[]
   createdAt          DateTime   @default(now())
+  orders             Order[]
 }
 
 model StoreItem {
@@ -114,6 +116,7 @@ model Driver {
   currentLng          Float
   isOnline            Boolean
   createdAt           DateTime @default(now())
+  orders              Order[]
 }
 
 model Order {
