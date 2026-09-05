@@ -782,8 +782,12 @@ export default function App() {
                       <div className="flex items-center gap-3.5 mb-4">
                         <div className="w-12 h-12 rounded-full border-2 border-blue-500 p-0.5 shrink-0">
                           <div className="w-full h-full bg-slate-800 rounded-full flex items-center justify-center text-xl">
-                            {latestActiveOrder?.type === 'cargo' ? '🚛' : latestActiveOrder?.type === 'store' ? '🛵' : '👨‍🔧'}
-                          </div>
+                            {latestActiveOrder?.type === 'ride_cargo'
+  ? '🚛'
+  : latestActiveOrder?.type === 'store_delivery'
+    ? '🛵'
+    : '👨‍🔧'}
+                        </div>
                         </div>
                         <div className="overflow-hidden">
                           <p className="text-sm font-bold text-white truncate">
