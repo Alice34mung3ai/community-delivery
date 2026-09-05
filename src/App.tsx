@@ -22,7 +22,7 @@ import LoginModal from './components/LoginModal';
 
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('tenant');
-  const [tenantAddress, setTenantAddress] = useState('72 Wall St, Apt 14C');
+  const [tenantAddress, setTenantAddress] = useState('Kilimani, Nairobi, Kenya');
 
   // Auth state
   const [user, setUser] = useState<{ id: string; email: string; role: string; name?: string } | null>(null);
@@ -160,10 +160,10 @@ export default function App() {
         title: `${selectedProForBooking.name} - ${bookingData.issueDescription.slice(0, 35)}...`,
         category: selectedProForBooking.category,
         providerId: selectedProForBooking.id,
-        tenantName: 'Jordan Vance',
-        tenantPhone: '+1 (555) 123-4567',
+        tenantName: 'Peterson Thuita',
+        tenantPhone: '+254 023 456 789',
         tenantAddress: tenantAddress,
-        apartmentUnit: 'Apt 14C',
+        apartmentUnit: undefined,
         subtotal: bookingData.subtotal,
         total: bookingData.total,
         deliveryFee: 0,
@@ -216,10 +216,10 @@ export default function App() {
         storeName: checkoutData.store.name,
         storeType: checkoutData.store.type,
         items: checkoutData.items,
-        tenantName: 'Jordan Vance',
-        tenantPhone: '+1 (555) 123-4567',
+        tenantName: 'Peterson Thuita',
+        tenantPhone: '+254 023 456 789',
         tenantAddress: tenantAddress,
-        apartmentUnit: 'Apt 14C',
+        apartmentUnit: undefined,
         subtotal: checkoutData.subtotal,
         deliveryFee: checkoutData.deliveryFee,
         serviceFee: checkoutData.serviceFee,
@@ -266,10 +266,10 @@ export default function App() {
         title: `Uber ${dispatchData.vehicleType} Dispatch`,
         category: 'transport',
         driverId: dispatchData.driver.id,
-        tenantName: 'Jordan Vance',
-        tenantPhone: '+1 (555) 123-4567',
+        tenantName: 'Jasmine Wangeci',
+        tenantPhone: '+254 034 567 890',
         tenantAddress: dispatchData.destinationLocation,
-        apartmentUnit: 'Dropoff Hub',
+        apartmentUnit: undefined,
         subtotal: dispatchData.total,
         deliveryFee: 0,
         serviceFee: 2.50,
@@ -846,7 +846,7 @@ export default function App() {
                             <p className="text-[10px] text-slate-400">Oct 12, 2:30 PM &bull; Completed</p>
                           </div>
                         </div>
-                        <span className="font-bold text-slate-800">$85.00</span>
+                        <span className="font-bold text-slate-800">Ksh850.00</span>
                       </div>
 
                       <div className="flex items-center justify-between text-xs">
@@ -857,7 +857,7 @@ export default function App() {
                             <p className="text-[10px] text-slate-400">Oct 10, 11:15 AM &bull; Completed</p>
                           </div>
                         </div>
-                        <span className="font-bold text-slate-800">$142.10</span>
+                        <span className="font-bold text-slate-800">Ksh1420.10</span>
                       </div>
 
                       <div className="flex items-center justify-between text-xs">
@@ -868,7 +868,7 @@ export default function App() {
                             <p className="text-[10px] text-slate-400">Sep 28, 4:00 PM &bull; Completed</p>
                           </div>
                         </div>
-                        <span className="font-bold text-slate-800">$55.00</span>
+                        <span className="font-bold text-slate-800">Ksh550.00</span>
                       </div>
                     </div>
 

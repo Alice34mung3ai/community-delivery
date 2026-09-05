@@ -26,6 +26,65 @@ app.use(
     credentials: true,
   })
 );
+<<<<<<< HEAD
+
+// --------------------------------------------------
+// KENYA-LOCALIZED FALLBACK DATA
+// --------------------------------------------------
+const initialPros: VerifiedPro[] = [
+  {
+    id: 'pro-1',
+    name: 'Griffins Munene',
+    avatar: 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?auto=format&fit=crop&q=80&w=300',
+    category: 'plumbing',
+    title: 'Master Licensed Plumber & Pipe Specialist',
+    rating: 4.95,
+    reviewCount: 342,
+    hourlyRate: 6500, // interpreted as KES for demo
+    isVerified: true,
+    licenseNumber: 'KP-89241-KE',
+    yearsExperience: 14,
+    distanceMiles: 0.9,
+    responseTimeMin: 15,
+    specialties: ['Emergency Leak Repair', 'Drain Camera & Snaking', 'Water Heater Replacement', 'Toilet & Valve Repair'],
+    badges: ['Background Checked', 'Licensed & Insured', 'Emergency 24/7', 'Top Rated'],
+    phone: '+254 733 000111',
+    completedJobs: 1240,
+    bio: 'Certified Master Plumber with over 14 years serving residential and commercial properties in Nairobi.',
+    location: {
+      lat: -1.286389,
+      lng: 36.817223,
+      address: 'Westlands, Nairobi, Kenya'
+    }
+  },
+  {
+    id: 'pro-2',
+    name: 'Samuel Mwangi',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300',
+    category: 'electrical',
+    title: 'Licensed Electrician & Maintenance',
+    rating: 4.8,
+    reviewCount: 210,
+    hourlyRate: 4500,
+    isVerified: true,
+    licenseNumber: 'KE-EL-56782',
+    yearsExperience: 10,
+    distanceMiles: 1.2,
+    responseTimeMin: 20,
+    specialties: ['Fault diagnosis', 'Breaker replacement', 'Wiring & Sockets'],
+    badges: ['Licensed & Insured', 'Local Expert'],
+    phone: '+254 712 000222',
+    completedJobs: 860,
+    bio: 'Experienced electrician servicing Nairobi and neighboring counties.',
+    location: {
+      lat: -1.283333,
+      lng: 36.816667,
+      address: 'Nairobi CBD, Kenya'
+    }
+  }
+];
+=======
+>>>>>>> origin/main
 
 // --------------------------------------------------
 // AUTHENTICATION
