@@ -22,27 +22,52 @@ app.use(cors({ origin: process.env.APP_ORIGIN || 'http://localhost:3000', creden
 const initialPros: VerifiedPro[] = [
   {
     id: 'pro-1',
-    name: 'Marco Rossi',
+    name: 'Griffins Munene',
     avatar: 'https://images.unsplash.com/photo-1540569014015-19a7be504e3a?auto=format&fit=crop&q=80&w=300',
     category: 'plumbing',
     title: 'Master Licensed Plumber & Pipe Specialist',
     rating: 4.95,
     reviewCount: 342,
-    hourlyRate: 65,
+    hourlyRate: 6500, // interpreted as KES for demo
     isVerified: true,
-    licenseNumber: 'MP-89241-NY',
+    licenseNumber: 'KP-89241-KE',
     yearsExperience: 14,
     distanceMiles: 0.9,
     responseTimeMin: 15,
     specialties: ['Emergency Leak Repair', 'Drain Camera & Snaking', 'Water Heater Replacement', 'Toilet & Valve Repair'],
-    badges: ['Background Checked', 'Licensed & Insured', 'Emergency 24/7', 'Top Rated 2025'],
-    phone: '+1 (555) 234-8910',
+    badges: ['Background Checked', 'Licensed & Insured', 'Emergency 24/7', 'Top Rated'],
+    phone: '+254 733 000111',
     completedJobs: 1240,
-    bio: 'Certified Master Plumber with over 14 years serving local residential complexes and apartment towers. Equipped with electronic leak detection and high-pressure jetters.',
+    bio: 'Certified Master Plumber with over 14 years serving residential and commercial properties in Nairobi.',
     location: {
-      lat: 40.7135,
-      lng: -74.0040,
-      address: '74 Hudson St, New York, NY'
+      lat: -1.286389,
+      lng: 36.817223,
+      address: 'Westlands, Nairobi, Kenya'
+    }
+  },
+  {
+    id: 'pro-2',
+    name: 'Samuel Mwangi',
+    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=300',
+    category: 'electrical',
+    title: 'Licensed Electrician & Maintenance',
+    rating: 4.8,
+    reviewCount: 210,
+    hourlyRate: 4500,
+    isVerified: true,
+    licenseNumber: 'KE-EL-56782',
+    yearsExperience: 10,
+    distanceMiles: 1.2,
+    responseTimeMin: 20,
+    specialties: ['Fault diagnosis', 'Breaker replacement', 'Wiring & Sockets'],
+    badges: ['Licensed & Insured', 'Local Expert'],
+    phone: '+254 712 000222',
+    completedJobs: 860,
+    bio: 'Experienced electrician servicing Nairobi and neighboring counties.',
+    location: {
+      lat: -1.283333,
+      lng: 36.816667,
+      address: 'Nairobi CBD, Kenya'
     }
   }
 ];
@@ -402,19 +427,19 @@ app.post('/api/orders', async (req: Request, res: Response) => {
         category: body.category,
         status: (body.type === 'service' && !assignedPro) ? 'pending' : 'assigned',
         tenantName: body.tenantName || 'Tenant',
-        tenantPhone: body.tenantPhone || '+1 (555) 123-4567',
-        tenantAddress: body.tenantAddress || '72 Wall St, Apt 14C',
-        apartmentUnit: body.apartmentUnit || 'Apt 14C',
+        tenantPhone: body.tenantPhone || '+254 123 456 789',
+        tenantAddress: body.tenantAddress || 'Riverside Drive, Nairobi',
+        apartmentUnit: body.apartmentUnit || undefined,
 
         providerId: assignedPro ? assignedPro.id : body.providerId,
         driverId: assignedDriver ? assignedDriver.id : body.driverId,
         storeId: body.storeId,
 
-        subtotal: Number(body.subtotal) || 45.0,
+        subtotal: Number(body.subtotal) || 450.0,
         deliveryFee: Number(body.deliveryFee) || 0,
-        serviceFee: Number(body.serviceFee) || 4.5,
-        tax: Number(body.tax) || 3.9,
-        total: Number(body.total) || 53.4,
+        serviceFee: Number(body.serviceFee) || 45.0,
+        tax: Number(body.tax) || 39.0,
+        total: Number(body.total) || 534.0,
         paymentMethod: body.paymentMethod || 'card',
 
         estimatedArrivalMin: body.estimatedArrivalMin || 20,
@@ -422,12 +447,12 @@ app.post('/api/orders', async (req: Request, res: Response) => {
         scheduledFor: body.scheduledFor ? new Date(body.scheduledFor) : undefined,
         notes: body.notes || '',
 
-        tenantLat: body.tenantLocation?.lat || 0,
-        tenantLng: body.tenantLocation?.lng || 0,
-        originLat: assignedPro ? assignedPro.lat : (body.originLocation?.lat || 0),
-        originLng: assignedPro ? assignedPro.lng : (body.originLocation?.lng || 0),
-        currentLat: assignedDriver ? assignedDriver.currentLat : (body.currentLocation?.lat || 0),
-        currentLng: assignedDriver ? assignedDriver.currentLng : (body.currentLocation?.lng || 0),
+        tenantLat: body.tenantLocation?.lat ?? -1.286389,
+        tenantLng: body.tenantLocation?.lng ?? 36.817223,
+        originLat: assignedPro ? assignedPro.lat : (body.originLocation?.lat ?? -1.286389),
+        originLng: assignedPro ? assignedPro.lng : (body.originLocation?.lng ?? 36.817223),
+        currentLat: assignedDriver ? assignedDriver.currentLat : (body.currentLocation?.lat ?? -1.286389),
+        currentLng: assignedDriver ? assignedDriver.currentLng : (body.currentLocation?.lng ?? 36.817223),
 
         messages: messages as any
       }
@@ -532,23 +557,23 @@ app.post('/api/ai/diagnose', async (req: Request, res: Response) => {
   let trade = category || 'plumbing';
   let urgency = 'medium';
   let safety = 'Turn off the affected fixture or switch if safe to do so.';
-  let cost = '$65 - $110';
+  let cost = 'Ksh650 - Ksh1100';
 
   if (lower.includes('leak') || lower.includes('water') || lower.includes('pipe') || lower.includes('clog') || lower.includes('toilet') || lower.includes('sink')) {
     trade = 'plumbing';
     urgency = lower.includes('flood') || lower.includes('burst') ? 'emergency' : 'high';
     safety = 'Locate and turn the clockwise shutoff valve beneath the fixture or at the main apartment riser.';
-    cost = '$75 - $140';
+    cost = 'Ksh750 - Ksh1400';
   } else if (lower.includes('spark') || lower.includes('breaker') || lower.includes('power') || lower.includes('shock') || lower.includes('outlet') || lower.includes('wire')) {
     trade = 'electrical';
     urgency = lower.includes('spark') || lower.includes('smoke') ? 'emergency' : 'high';
     safety = 'Do not touch wet cords or outlets. Switch off the relevant sub-breaker in your panel immediately.';
-    cost = '$80 - $160';
+    cost = 'Ksh800 - Ksh1600';
   } else if (lower.includes('clean') || lower.includes('mold') || lower.includes('stain') || lower.includes('dust') || lower.includes('move')) {
     trade = 'cleaning';
     urgency = 'standard';
     safety = 'Keep windows ventilated if handling strong cleaning odors.';
-    cost = '$48 - $95';
+    cost = 'Ksh480 - Ksh950';
   }
 
   return res.json({
