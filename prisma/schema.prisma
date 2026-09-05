@@ -46,46 +46,48 @@ enum OrderStatus {
 }
 
 model VerifiedPro {
-  id               String    @id @default(cuid())
-  name             String
-  avatar           String?
-  category         ServiceCategory
-  title            String
-  rating           Float
-  reviewCount      Int
-  hourlyRate       Float
-  isVerified       Boolean
-  licenseNumber    String?
-  yearsExperience  Int
-  distanceMiles    Float
-  responseTimeMin  Int
-  specialties      String[]
-  badges           String[]
-  phone            String
-  completedJobs    Int
-  bio              String?
-  lat              Float
-  lng              Float
-  address          String
-  createdAt        DateTime  @default(now())
+  id              String          @id @default(cuid())
+  name            String
+  avatar          String?
+  category        ServiceCategory
+  title           String
+  rating          Float
+  reviewCount     Int
+  hourlyRate      Float
+  isVerified      Boolean
+  licenseNumber   String?
+  yearsExperience Int
+  distanceMiles   Float
+  responseTimeMin Int
+  specialties     String[]
+  badges          String[]
+  phone           String
+  completedJobs   Int
+  bio             String?
+  lat             Float
+  lng             Float
+  address         String
+  createdAt       DateTime        @default(now())
+  Order           Order[]
 }
 
 model LocalStore {
-  id                 String     @id @default(cuid())
-  name               String
-  type               StoreType
-  logo               String?
-  coverImage         String?
-  rating             Float
-  reviewCount        Int
-  distanceMiles      Float
+  id                  String      @id @default(cuid())
+  name                String
+  type                StoreType
+  logo                String?
+  coverImage          String?
+  rating              Float
+  reviewCount         Int
+  distanceMiles       Float
   deliveryEstimateMin Int
-  deliveryFee        Float
-  minOrder           Float
-  address            String
-  isOpen             Boolean
-  items              StoreItem[]
-  createdAt          DateTime   @default(now())
+  deliveryFee         Float
+  minOrder            Float
+  address             String
+  isOpen              Boolean
+  items               StoreItem[]
+  createdAt           DateTime    @default(now())
+  Order               Order[]
 }
 
 model StoreItem {
@@ -114,39 +116,40 @@ model Driver {
   currentLng          Float
   isOnline            Boolean
   createdAt           DateTime @default(now())
+  Order               Order[]
 }
 
 model Order {
-  id                 String      @id @default(cuid())
-  type               OrderType
-  title              String
-  category           String?
-  status             OrderStatus
-  createdAt          DateTime    @default(now())
-  tenantName         String
-  tenantPhone        String
-  tenantAddress      String
-  apartmentUnit      String?
-  providerId         String?
-  provider           VerifiedPro? @relation(fields: [providerId], references: [id])
-  driverId           String?
-  driver             Driver?      @relation(fields: [driverId], references: [id])
-  storeId            String?
-  store              LocalStore?  @relation(fields: [storeId], references: [id])
-  subtotal           Float
-  deliveryFee        Float
-  serviceFee         Float
-  tax                Float
-  total              Float
-  paymentMethod      String
+  id                  String       @id @default(cuid())
+  type                OrderType
+  title               String
+  category            String?
+  status              OrderStatus
+  createdAt           DateTime     @default(now())
+  tenantName          String
+  tenantPhone         String
+  tenantAddress       String
+  apartmentUnit       String?
+  providerId          String?
+  provider            VerifiedPro? @relation(fields: [providerId], references: [id])
+  driverId            String?
+  driver              Driver?      @relation(fields: [driverId], references: [id])
+  storeId             String?
+  store               LocalStore?  @relation(fields: [storeId], references: [id])
+  subtotal            Float
+  deliveryFee         Float
+  serviceFee          Float
+  tax                 Float
+  total               Float
+  paymentMethod       String
   estimatedArrivalMin Int
-  urgency            String
-  scheduledFor       DateTime?
-  notes              String?
-  tenantLat          Float?
-  tenantLng          Float?
-  originLat          Float?
-  originLng          Float?
-  currentLat         Float?
-  currentLng         Float?
+  urgency             String
+  scheduledFor        DateTime?
+  notes               String?
+  tenantLat           Float?
+  tenantLng           Float?
+  originLat           Float?
+  originLng           Float?
+  currentLat          Float?
+  currentLng          Float?
 }
