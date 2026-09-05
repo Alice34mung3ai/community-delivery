@@ -105,18 +105,31 @@ model StoreItem {
 
 model Driver {
   id                  String   @id @default(cuid())
+userId         String   @unique
   name                String
+  phone          String
   avatar              String?
-  vehicleType         String
+  
   vehiclePlate        String
   rating              Float
   completedDeliveries Int
-  phone               String
+  
   currentLat          Float
   currentLng          Float
   isOnline            Boolean
   createdAt           DateTime @default(now())
   Order               Order[]
+  idNumber       String?          // National ID / passport
+  idDocumentUrl  String?          // URL to uploaded ID document (S3)
+  vehicleReg     String?          // vehicle registration / plate
+  vehicleType    String?          // 'motorbike' | 'car' | etc.
+  vehicleDocUrl  String?          // uploaded vehicle documents
+  payoutMethod   String?          // 'mpesa' | 'bank' | 'cash'
+  payoutInfo     Json?            // e.g., { mpesaNumber: '+2547...', bank: { bank: '', acct: '' } }
+  verified       Boolean  @default(false)
+  verifiedAt     DateTime?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model Order {
@@ -152,4 +165,19 @@ model Order {
   originLng           Float?
   currentLat          Float?
   currentLng          Float?
+}
+
+model Payout {
+  id          String   @id @default(cuid())
+  driverId    String
+  amount      Decimal  @db.Decimal(10, 2)
+  currency    String   @default("KES")
+  provider    String?  // 'mpesa'|'bank'
+  providerId  String?  // external id
+  status      String   @default("pending")
+  metadata    Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([driverId])
 }
