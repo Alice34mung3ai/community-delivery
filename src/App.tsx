@@ -20,15 +20,18 @@ import DriverDashboard from './components/DriverDashboard';
 import MerchantDashboard from './components/MerchantDashboard';
 import LoginModal from './components/LoginModal';
 import RegisterModal from './components/RegisterModal';
+import ForgotPasswordModal from './components/ForgotPasswordModal';
+import { useAuth } from './contexts/AuthContext';
 
 export default function App() {
   const [currentRole, setCurrentRole] = useState<UserRole>('tenant');
   const [tenantAddress, setTenantAddress] = useState('Kilimani, Nairobi, Kenya');
 
-  // Auth state
-  const [user, setUser] = useState<{ id: string; email: string; role: string; name?: string } | null>(null);
+  // Auth state -- identity and session come from Supabase via AuthContext.
+  const { user, session, signOut } = useAuth();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [isRegisterOpen, setIsRegisterOpen] = useState(false);
+  const [isForgotOpen, setIsForgotOpen] = useState(false);
 
   // Backend loaded data
   const [pros, setPros] = useState<VerifiedPro[]>([]);
@@ -61,38 +64,38 @@ export default function App() {
     setTimeout(() => setToastMessage(null), 4000);
   };
 
-  // Auth handlers
-  const handleLogin = (serverUser: { id: string; email: string; role: string; name?: string }) => {
-    setUser(serverUser);
+  // Auth handlers -- AuthContext already updates `user`/`session` via
+  // Supabase's onAuthStateChange listener, so these just close the modal
+  // and surface feedback.
+  const handleLoggedIn = () => {
     setIsLoginOpen(false);
-    showToast(`${serverUser.name || serverUser.email} signed in as ${serverUser.role.toUpperCase()}`);
+    showToast('Signed in');
   };
 
-  const handleRegister = (serverUser: { id: string; email: string; role: string; name?: string }) => {
-    setUser(serverUser);
+  const handleRegistered = () => {
     setIsRegisterOpen(false);
-    showToast(`Welcome, ${serverUser.name || serverUser.email}! Account created as ${serverUser.role.toUpperCase()}`);
+    showToast('Account created');
   };
 
   const handleLogout = async () => {
-    try {
-      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' });
-    } catch (err) {
-      console.warn('Logout request failed', err);
-    } finally {
-      setUser(null);
-      showToast('Signed out');
-    }
+    await signOut();
+    showToast('Signed out');
   };
+
+  // Attach the caller's Supabase access token so Express can identify who
+  // is making the request (see server/lib/supabaseAdmin.ts requireAuth()).
+  // Row Level Security in Postgres is the authoritative check either way.
+  const authHeaders = (): HeadersInit =>
+    session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : {};
 
   // Initial Fetch from Node.js Express API
   const fetchData = async () => {
     try {
       const [prosRes, storesRes, driversRes, ordersRes] = await Promise.all([
-        fetch('/api/services', { credentials: 'include' }),
-        fetch('/api/stores', { credentials: 'include' }),
-        fetch('/api/drivers', { credentials: 'include' }),
-        fetch('/api/orders', { credentials: 'include' })
+        fetch('/api/services', { headers: authHeaders() }),
+        fetch('/api/stores', { headers: authHeaders() }),
+        fetch('/api/drivers', { headers: authHeaders() }),
+        fetch('/api/orders', { headers: authHeaders() })
       ]);
 
       const [prosData, storesData, driversData, ordersData] = await Promise.all([
@@ -121,8 +124,11 @@ export default function App() {
   };
 
   useEffect(() => {
+    // Re-fetch whenever auth state changes so order visibility (governed by
+    // Postgres RLS) reflects who's actually signed in.
     fetchData();
-  }, []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [session?.access_token]);
 
   // Cart operations
   const handleAddToCart = (item: StoreItem, store: LocalStore) => {
@@ -186,8 +192,7 @@ export default function App() {
 
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -241,8 +246,7 @@ export default function App() {
 
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -291,8 +295,7 @@ export default function App() {
 
       const res = await fetch('/api/orders', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(payload)
       });
       const data = await res.json();
@@ -312,8 +315,7 @@ export default function App() {
     try {
       const res = await fetch(`/api/orders/${orderId}/status`, {
         method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ status, proId, driverId })
       });
       const data = await res.json();
@@ -338,8 +340,7 @@ export default function App() {
 
       const res = await fetch(`/api/orders/${orderId}/messages`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ sender, senderName, text })
       });
       const data = await res.json();
@@ -1056,12 +1057,23 @@ export default function App() {
 
       {/* Login Modal */}
       {isLoginOpen && (
-        <LoginModal onClose={() => setIsLoginOpen(false)} onLogin={handleLogin} />
+        <LoginModal
+          onClose={() => setIsLoginOpen(false)}
+          onLoggedIn={handleLoggedIn}
+          onForgotPassword={() => {
+            setIsLoginOpen(false);
+            setIsForgotOpen(true);
+          }}
+        />
       )}
 
       {/* Register Modal */}
       {isRegisterOpen && (
-        <RegisterModal onClose={() => setIsRegisterOpen(false)} onRegister={handleRegister} />
+        <RegisterModal onClose={() => setIsRegisterOpen(false)} onRegistered={handleRegistered} />
+      )}
+
+      {isForgotOpen && (
+        <ForgotPasswordModal onClose={() => setIsForgotOpen(false)} />
       )}
 
     </div>

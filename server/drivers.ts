@@ -1,16 +1,13 @@
-import express, { Request, Response, NextFunction } from 'express';
-import multer, { Multer } from 'multer';
+import express, { Response } from 'express';
+import multer from 'multer';
 import { PrismaClient } from '@prisma/client';
-import jwt from 'jsonwebtoken';
 import { uploadBufferToS3 } from './uploads';
 import { normalizeKenyaPhone } from '../src/utils/phone-server';
+import { requireAuth, optionalAuth, AuthedRequest } from './lib/supabaseAdmin';
 
 const prisma = new PrismaClient();
 
 const router = express.Router();
-
-const JWT_SECRET =
-  process.env.JWT_SECRET || 'dev_secret_change_me';
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -19,99 +16,11 @@ const upload = multer({
   },
 });
 
-interface DriverAuthRequest extends Request {
-  user?: {
-    id: string;
-    email: string;
-    role: string;
-  };
-}
-
-// --------------------------------------------------
-// AUTH HELPERS
-// --------------------------------------------------
-
-function getTokenFromReq(req: Request) {
-  const anyReq = req as any;
-
-  if (anyReq.cookies?.session) {
-    return anyReq.cookies.session;
-  }
-
-  const auth = req.headers.authorization;
-
-  if (auth?.startsWith('Bearer ')) {
-    return auth.slice(7);
-  }
-
-  return null;
-}
-
-function optionalAuth(
-  req: DriverAuthRequest,
-  _res: Response,
-  next: NextFunction
-) {
-  const token = getTokenFromReq(req);
-
-  if (!token) {
-    return next();
-  }
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-
-    req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role,
-    };
-  } catch {
-    // Invalid token is ignored for optional authentication.
-    // The endpoint can still operate anonymously where allowed.
-  }
-
-  next();
-}
-
-function adminOnly(
-  req: DriverAuthRequest,
-  res: Response,
-  next: NextFunction
-) {
-  const token = getTokenFromReq(req);
-
-  if (!token) {
-    return res.status(401).json({
-      success: false,
-      error: 'Missing authorization token',
-    });
-  }
-
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET) as any;
-
-    req.user = {
-      id: decoded.id,
-      email: decoded.email,
-      role: decoded.role,
-    };
-
-    if (req.user.role !== 'admin') {
-      return res.status(403).json({
-        success: false,
-        error: 'Forbidden',
-      });
-    }
-
-    return next();
-  } catch {
-    return res.status(401).json({
-      success: false,
-      error: 'Invalid authorization token',
-    });
-  }
-}
+// Auth is centralised in server/lib/supabaseAdmin.ts -- requireAuth(['admin'])
+// below replaces this file's old hand-rolled JWT `adminOnly` middleware, and
+// optionalAuth() replaces the old cookie/JWT-based one. Both now verify a
+// real Supabase session instead of a locally-signed JWT.
+type DriverAuthRequest = AuthedRequest;
 
 // --------------------------------------------------
 // DRIVER APPLICATION
@@ -119,7 +28,7 @@ function adminOnly(
 
 router.post(
   '/apply',
-  optionalAuth,
+  requireAuth(['driver']),
   upload.fields([
     {
       name: 'idDocument',
@@ -183,24 +92,21 @@ router.post(
       // USER ID
       // ------------------------------------------------
 
-      const userId =
-        req.user?.id || `anon-${Date.now()}-${Math.random()}`;
+      // requireAuth(['driver']) guarantees req.user is set here.
+      const userId = req.user!.id;
 
-      // If the authenticated user already has a driver
-      // application, don't create a duplicate.
-      if (req.user?.id) {
-        const existingDriver = await prisma.driver.findUnique({
-          where: {
-            userId: req.user.id,
-          },
+      // Don't let the same account submit a second application.
+      const existingDriver = await prisma.driver.findUnique({
+        where: {
+          userId,
+        },
+      });
+
+      if (existingDriver) {
+        return res.status(409).json({
+          success: false,
+          error: 'You already have a driver application',
         });
-
-        if (existingDriver) {
-          return res.status(409).json({
-            success: false,
-            error: 'You already have a driver application',
-          });
-        }
       }
 
       // ------------------------------------------------
@@ -313,7 +219,7 @@ router.post(
 
 router.get(
   '/pending',
-  adminOnly,
+  requireAuth(['admin']),
   async (_req: DriverAuthRequest, res: Response) => {
     try {
       const pending = await prisma.driver.findMany({
@@ -346,7 +252,7 @@ router.get(
 
 router.patch(
   '/:id/approve',
-  adminOnly,
+  requireAuth(['admin']),
   async (req: DriverAuthRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -395,7 +301,7 @@ router.patch(
 
 router.patch(
   '/:id/reject',
-  adminOnly,
+  requireAuth(['admin']),
   async (req: DriverAuthRequest, res: Response) => {
     try {
       const { id } = req.params;
@@ -451,7 +357,7 @@ router.patch(
 
 router.get(
   '/me',
-  optionalAuth,
+  optionalAuth(),
   async (req: DriverAuthRequest, res: Response) => {
     try {
       const userId = req.user?.id;

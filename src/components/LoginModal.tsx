@@ -1,36 +1,34 @@
 import React, { useState } from 'react';
 import { User, Lock, LogIn, X } from 'lucide-react';
-import { UserRole } from '../types';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LoginModalProps {
   onClose: () => void;
-  onLogin: (user: { id: string; email: string; role: string; name?: string }) => void;
+  onLoggedIn?: () => void;
+  onForgotPassword?: () => void;
 }
 
-export default function LoginModal({ onClose, onLogin }: LoginModalProps) {
+export default function LoginModal({ onClose, onLoggedIn, onForgotPassword }: LoginModalProps) {
+  const { signIn } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('tenant');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setLoading(true);
     try {
-      const res = await fetch('/api/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ email, password })
-      });
-      const data = await res.json();
-      if (!data.success) {
-        alert(data.error || 'Sign in failed');
+      const result = await signIn(email, password);
+      if (!result.success) {
+        setError(result.error || 'Sign in failed');
         return;
       }
-      onLogin(data.data.user);
+      onLoggedIn?.();
       onClose();
-    } catch (err) {
-      console.error('Login request failed', err);
-      alert('Login request failed');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -45,21 +43,29 @@ export default function LoginModal({ onClose, onLogin }: LoginModalProps) {
               <p className="text-xs text-slate-500">Access tenant, provider, driver, and store portals</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100">
+          <button onClick={onClose} className="p-2 rounded-full hover:bg-slate-100" aria-label="Close">
             <X className="w-4 h-4 text-slate-600" />
           </button>
         </div>
 
+        {error && (
+          <div className="mb-4 px-3 py-2 rounded-xl bg-rose-50 border border-rose-200 text-xs text-rose-700 font-semibold" role="alert">
+            {error}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-slate-600">Email</label>
+            <label htmlFor="login-email" className="text-xs font-semibold text-slate-600">Email</label>
             <div className="mt-1 relative">
               <User className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
+                id="login-email"
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
+                autoComplete="email"
                 placeholder="you@example.com"
                 className="w-full pl-10 pr-3 py-2 rounded-xl border border-slate-200 text-sm"
               />
@@ -67,76 +73,43 @@ export default function LoginModal({ onClose, onLogin }: LoginModalProps) {
           </div>
 
           <div>
-            <label className="text-xs font-semibold text-slate-600">Password</label>
+            <div className="flex items-center justify-between">
+              <label htmlFor="login-password" className="text-xs font-semibold text-slate-600">Password</label>
+              {onForgotPassword && (
+                <button type="button" onClick={onForgotPassword} className="text-xs text-blue-600 hover:underline">
+                  Forgot password?
+                </button>
+              )}
+            </div>
             <div className="mt-1 relative">
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
+                id="login-password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
                 placeholder="Enter password"
                 className="w-full pl-10 pr-3 py-2 rounded-xl border border-slate-200 text-sm"
               />
             </div>
           </div>
 
-          <div>
-            <label className="text-xs font-semibold text-slate-600">Sign in as</label>
-            <div className="mt-1 flex gap-2 text-xs">
-              <button type="button" onClick={() => setRole('tenant')} className={`px-3 py-1 rounded-full border ${role === 'tenant' ? 'bg-slate-900 text-white' : 'bg-white'}`}>
-                Tenant
-              </button>
-              <button type="button" onClick={() => setRole('provider')} className={`px-3 py-1 rounded-full border ${role === 'provider' ? 'bg-slate-900 text-white' : 'bg-white'}`}>
-                Provider
-              </button>
-              <button type="button" onClick={() => setRole('driver')} className={`px-3 py-1 rounded-full border ${role === 'driver' ? 'bg-slate-900 text-white' : 'bg-white'}`}>
-                Driver
-              </button>
-              <button type="button" onClick={() => setRole('merchant')} className={`px-3 py-1 rounded-full border ${role === 'merchant' ? 'bg-slate-900 text-white' : 'bg-white'}`}>
-                Merchant
-              </button>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between gap-3">
-            <button type="submit" className="flex-1 inline-flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold">
-              <LogIn className="w-4 h-4" />
-              Sign in
-            </button>
-            <button
-              type="button"
-              onClick={async () => {
-                setEmail('demo@tenant.test');
-                setPassword('password');
-                setRole('tenant');
-                try {
-                  const res = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    credentials: 'include',
-                    body: JSON.stringify({ email: 'demo@tenant.test', password: 'password' })
-                  });
-                  const data = await res.json();
-                  if (data.success) {
-                    onLogin(data.data.user);
-                    onClose();
-                  } else {
-                    alert(data.error || 'Demo login failed');
-                  }
-                } catch (err) {
-                  console.error(err);
-                  alert('Demo login failed');
-                }
-              }}
-              className="text-xs text-slate-500 underline"
-            >
-              Quick demo
-            </button>
-          </div>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full inline-flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-60 text-white rounded-xl font-semibold"
+          >
+            <LogIn className="w-4 h-4" />
+            {loading ? 'Signing in...' : 'Sign in'}
+          </button>
         </form>
 
-        <p className="text-[11px] text-slate-400 mt-4">This login UI now communicates with the server using HTTP-only cookies.</p>
+        <p className="text-[11px] text-slate-400 mt-4">
+          Your role (tenant, provider, driver, or merchant) is set when you register and
+          decides which dashboard you land on after signing in.
+        </p>
       </div>
     </div>
   );
